@@ -108,18 +108,7 @@ y = df.iloc[:,8]
 #x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.3,random_state=0)
 
 
-#Selecting Best Features
 
-bestfeatures = SelectKBest(score_func=chi2, k=8)
-fit = bestfeatures.fit(x,y)
-dfscores = pd.DataFrame(fit.scores_)
-dfcolumns = pd.DataFrame(x.columns) 
-featureScores = pd.concat([dfcolumns,dfscores],axis=1)
-featureScores.columns = ['Features','Score']  
-print(featureScores.nlargest(8,'Score'))
-
-
-#Random forest classifier
 
 model = RandomForestClassifier()
 model.fit(x,y)
@@ -147,44 +136,6 @@ fit = pca.fit(x)
 #print("Explained Variance: %s" % fit.explained_variance_ratio_)
 print(fit.components_)
 
-
-#Display chart based on outcome
-
-df.groupby('Outcome').size()
-
-
-
-df.groupby('Outcome').hist(figsize=(10, 10))
-
-
-#Data Preprocessing
-# BP values whose input is zero
-
-print("Total : ", df[df.BloodPressure == 0].shape[0])
-print(df[df.BloodPressure == 0].groupby('Outcome')['Age'].count())
-
-
-# Glucose values whose input is zero
-
-print("Total : ", df[df.Glucose == 0].shape[0])
-print(df[df.Glucose == 0].groupby('Outcome')['Age'].count())
-
-
-#Skin thickness whose input value is zero
-print("Total : ", df[df.SkinThickness == 0].shape[0])
-print(df[df.SkinThickness == 0].groupby('Outcome')['Age'].count())
-
-
-# Records with BMI zero
-
-print("Total : ", df[df.BMI == 0].shape[0])
-print(df[df.BMI == 0].groupby('Outcome')['Age'].count())
-
-
-#Records with insulin zero
-
-print("Total : ", df[df.Insulin == 0].shape[0])
-print(df[df.Insulin == 0].groupby('Outcome')['Age'].count())
 
 
 # Preprocessing records
@@ -226,14 +177,6 @@ calculateperformance(y_test, y_pred,"GPC")
 AUCCurve(gpc_rbf_isotropic,"GPC")
 
 
-#from sklearn.naive_bayes import GaussianNB
-#naivebayesclassifier = GaussianNB(priors=[0.7041502, 0.2958498])
-#naivebayesclassifier.fit(x_train, y_train)
-#y_pred=naivebayesclassifier.predict(x_test)
-#accuracyrf = round(accuracy_score(y_pred, y_test), 5)
-#accuracyrf
-
-
 #RF
 rmfr = RandomForestClassifier()
 rmfr.fit(x_train, y_train)
@@ -246,11 +189,6 @@ AUCCurve(rmfr,"RFC")
 #accuracyrf
 
 
-
-#Random forest parameter tuning
-#n_estimators represents the number of trees in the forest. Usually the higher the number of trees the better to learn the data.
-#However, adding a lot of trees can slow down the training process considerably, therefore we do a parameter search to find the
-#sweet spot.
 # n_estimators = number of tress
 n_estimators = [1, 2, 4, 8, 16, 32, 64, 100, 200]
 train_results = []
@@ -285,10 +223,6 @@ calculateperformance(y_test, y_pred,"RFestimators50")
 AUCCurve(rmfr1,"RFEstimator50")
 #accuracyrf
 
-
-#max_depth tuning in random forest
-#max_depth represents the depth of each tree in the forest. The deeper the tree, the more splits it has and it captures more
-#information about the data. We fit each decision tree with depths ranging from 1 to 32 and plot the training and test errors.
 
 max_depths = np.linspace(1, 32, 32, endpoint=True)
 train_results = []
@@ -366,8 +300,7 @@ AUCCurve(rmfr3,"RFminsamples")
 
 
 #min_samples_leaf
-#min_samples_leaf is The minimum number of samples required to be at a leaf node. This parameter is similar 
-#to min_samples_splits, however, this describe the minimum number of samples of samples at the leafs, the base of the tree.
+
 min_samples_leafs = np.linspace(0.1, 0.5, 5, endpoint=True)
 train_results = []
 test_results = []
@@ -401,9 +334,6 @@ y_pred = rmfr4.predict(x_test)
 #accuracyrf
 calculateperformance(y_test, y_pred,"RFminsamplesleaf")
 AUCCurve(rmfr4,"RFminsamplesleaf")
-
-
-
 
 max_features = list(range(1,x.shape[1]))
 train_results = []
@@ -611,57 +541,6 @@ accuracy
 
 
 
-#from sklearn import svm
-#sv = svm.SVC(kernel='poly')
-#sv.fit(x_train,y_train)
-#pred = sv.predict(x_test)
-#accuracy = round(accuracy_score(y_test, pred),5)
-#models.append("SVMpoly")
-#scores.append(accuracy)
-#accuracy
-
-
-# parameter tunig in svc by changing gamma
-
-#gamma
-#gamma is a parameter for non linear hyperplanes. The higher the gamma value it tries to exactly fit the training data set
-#from sklearn import svm
-#sv = svm.SVC(kernel='rbf',gamma=0.5)
-#sv.fit(x_train,y_train)
-#pred = sv.predict(x_test)
-#accuracy = round(accuracy_score(y_test, pred),5)
-#accuracy
-
-
-#C
-#C is the penalty parameter of the error term. It controls the trade off between smooth decision boundary and classifying the 
-#training points correctly.
-#from sklearn import svm
-#sv = svm.SVC(kernel='rbf',C=0.1)
-#sv.fit(x_train,y_train)
-#pred = sv.predict(x_test)
-#accuracy = round(accuracy_score(y_test, pred),5)
-#accuracy
-
-
-#from sklearn import svm
-#sv = svm.SVC(kernel='rbf',C=1,probability=True)
-#sv.fit(x_train,y_train)
-#pred = sv.predict(x_test)
-#accuracy = round(accuracy_score(y_test, pred),5)
-#accuracy
-
-
-
-from sklearn import preprocessing
-scaler = preprocessing.StandardScaler().fit(x_train)
-x_train_transformed = scaler.transform(x_train)
-clf = svm.SVC(C=1).fit(x_train_transformed, y_train)
-x_test_transformed = scaler.transform(x_test)
-clf.score(x_test_transformed, y_test)
-
-
-
 gbi = GradientBoostingClassifier(learning_rate=0.05,max_depth=3,max_features=0.5)
 gbi.fit(x_train,y_train)
 
@@ -755,51 +634,12 @@ knn = KNeighborsClassifier(n_neighbors=16)
 knn.fit(x_train,y_train)
 pred = knn.predict(x_test)
 accuracy = round(accuracy_score(y_test, pred),5)
-accuracy
-#print('WITH K=19')
-#print('\n')
-#print(confusion_matrix(y_test,pred))
-#print('\n')
-#print(classification_report(y_test,pred))
-
-
-
-#sns.pairplot(df, size=3, hue='Outcome', palette='husl',)
-#plt.show()
-
-
 
 train_score=pd.DataFrame({'Model':names , 'Accuracy': perfor , 'NPV' : npvalues , 'PPV' : PPV, 'Sensitivity' : sensiti ,'Specificity' : specifi, 'FNR' : fnr, 'FPR' :fpr,'TNR' :tnr,'TPR' :tpr,'AUC' :aucperf })
-
-
 
 #train_score
 train_score.sort_values("Accuracy", axis = 0, ascending = False, 
                  inplace = True, na_position ='last') 
-train_score
-
-
-
-#train_score1=train_score[train_score["Scores"]>0.73]
-
-
-
-#axis = sns.barplot(x = 'Model', y = 'Accuracy', data = train_score)
-#axis.set(xlabel='Classifier', ylabel='Accuracy')
-#plt.figure(figsize=(15,11))
-#for p in axis.patches:
-    #height = p.get_height()
-    #axis.text(p.get_x() + p.get_width()/2, height+0.005, '{:1.4f}'.format(height), ha="center") 
-    #axis.set_xticklabels(axis.get_xticklabels(), rotation=40, ha="right")
-    #plt.tight_layout()
-#plt.show()
-
-
-
-#from sklearn import tree
-#plt.figure(figsize=(40,20))  # customize according to the size of your tree
-#_ = tree.plot_tree(clf, feature_names = x.columns,filled=True, fontsize=20, rounded = True)
-#plt.show()
 
 
 # Load libraries
